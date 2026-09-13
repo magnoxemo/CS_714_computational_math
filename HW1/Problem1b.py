@@ -24,17 +24,6 @@ def laplacian_f(x):
 def step_size(k):
     return 10**(-k/100)
 
-# def fdm_approximation_3_node(function, step_size):
-#     x1 = 0
-#     x3 = step_size
-#     x2 = np.random.uniform(low=x1, high=x3)  # single random interior point
-#
-#     w1 = 2/((x1-x2)*(x1-x3))
-#     w2 = 2/((x2-x1)*(x2-x3))
-#     w3 = 2/((x3-x1)*(x3-x2))
-#
-#     laplacian_fdm_approx = w1*function(x1) + w2*function(x2) + w3*function(x3)
-#     return laplacian_fdm_approx, x2
 
 def fdm_approximation_4_node(function, step_size):
     """
@@ -46,20 +35,21 @@ def fdm_approximation_4_node(function, step_size):
     x4 = step_size
     # x2 and x3 are uniformly distributed within [x1=0, x4=step_size]
     x2, x3 = np.sort(np.random.uniform(low=x1, high=x4, size=2))
+    h1 = x2-x1
+    h2 = x3-x2
+    h3 = x4-x3
 
-    w1 = 2/((x1-x2)*(x1-x3)) + 2/((x1-x2)*(x1-x4)) + 2/((x1-x3)*(x1-x4))
-    w2 = 2/((x2-x1)*(x2-x3)) + 2/((x2-x1)*(x2-x4)) + 2/((x2-x3)*(x2-x4))
-    w3 = 2/((x3-x1)*(x3-x2)) + 2/((x3-x1)*(x3-x4)) + 2/((x3-x2)*(x3-x4))
-    w4 = 2/((x4-x1)*(x4-x2)) + 2/((x4-x1)*(x4-x3)) + 2/((x4-x2)*(x4-x3))
-
-    laplacian_fdm_approx = 0
-    for x, w in zip([x1, x2, x3, x4], [w1, w2, w3, w4]):
-        laplacian_fdm_approx += w * function(x)
+    a = (2 * (2*h2 + h3) / (h1 * (h1 + h2) * (h1 + h2 + h3)))
+    b = (2 * (h1 - 2*h2 - h3) / (h1 * h2 * (h2 + h3)))
+    c = (-2 * (h1 - h2 - h3)/ (h2 * h3 * (h1 + h2)))
+    d = (2 * (h1 - h2)/ (h3 * (h2 + h3) * (h1 + h2 + h3)))
+    
+    laplacian_fdm_approx = a*function(x1) + b * function(x2) + c* function(x3)+ d*function(x4)
     return laplacian_fdm_approx, x2
 
 
 def main():
-    H = step_size(np.linspace(101, 300, 1000))
+    H = step_size(np.linspace(100, 300, 200))
     approximations = []
     evaluated_points = []
     for h in H:
